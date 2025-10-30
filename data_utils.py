@@ -15,10 +15,10 @@ IMG_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 1)
 def load_and_split_data(csv_path, data_dir, test_size=0.1, random_state=42):
     print(f"Loading data from {csv_path}...")
     df = pd.read_csv(csv_path)
-    df['Label'] = df['Label'].astype(str)
-    max_label_len = df['Label'].str.len().max()
+    df['Labels'] = df['Labels'].astype(str)
+    max_label_len = df['Labels'].str.len().max()
     print(f"Max label length found: {max_label_len}")
-    df['Image_Path'] = df['Image_Path'].apply(lambda x: os.path.join(data_dir, x))
+    df['ImageName'] = df['ImageName'].apply(lambda x: os.path.join(data_dir, x))
     print(f"Splitting data into train and validation sets (test_size={test_size})...")
     train_df, val_df = train_test_split(df, test_size=test_size, random_state=random_state)
     train_df = train_df.reset_index(drop=True)
@@ -60,10 +60,10 @@ class DataGenerator(tf.keras.utils.Sequence):
         label_length = np.zeros((self.batch_size, 1), dtype=np.int64)
 
         for i, row in enumerate(batch_df.itertuples()):
-            img_path = row.Image_Path
+            img_path = row.ImageName
             img = preprocess_image(img_path, (self.img_shape[1], self.img_shape[0]))
             X[i] = img
-            label = str(row.Label)
+            label = str(row.Labels)
             label_length[i] = len(label)
             encoded_label = self._encode_to_labels(label)
             y[i, 0:len(encoded_label)] = encoded_label
